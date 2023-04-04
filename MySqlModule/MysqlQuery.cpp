@@ -5,9 +5,13 @@
 #include<string>
 #include<chrono>
 #include<thread>
+#include<algorithm>
+#include <sstream>
+
+#include"muduo/base/Logging.h"
 
 #include"MysqlQuery.hpp"
-#include"muduo/base/Logging.h"
+#include"ProcedureHelper.hpp"
 
 #pragma warning(disable:4996 )
 
@@ -265,7 +269,7 @@ void KKDD_SQL_MODULE::MyQuery::ExecuteSentence(SqlPack *pack)
 				return;
 			pack->sql_callback(qr);
 		}
-		break;
+	break;
 	case SQL_PACK_TYPE::SQL_STMT_TYPE:
 		{
 			if(__UNUSEFUL__)
@@ -275,7 +279,7 @@ void KKDD_SQL_MODULE::MyQuery::ExecuteSentence(SqlPack *pack)
 				return;
 			pack->sql_callback(qr);	
 		}
-		break;
+	break;
 	case SQL_PACK_TYPE::SQL_PROCEDURE_TYPE:
 		{
 			if(__UNUSEFUL__)
@@ -283,7 +287,7 @@ void KKDD_SQL_MODULE::MyQuery::ExecuteSentence(SqlPack *pack)
 			if(!ExecuteProcedure(pack))
 				return;
 		}
-		break;
+	break;
 	default:
 		LOG_ERROR << "ExecuteSentence type undifine";
 	break;
@@ -292,7 +296,17 @@ void KKDD_SQL_MODULE::MyQuery::ExecuteSentence(SqlPack *pack)
 
 bool KKDD_SQL_MODULE::MyQuery::ExecuteProcedure(SqlPack *pack)
 {
-	static ProcedureHelper pdcHelper;	//注意这是线程不安全的喔，后续要是sql并发比较大的话，考虑做成多线程，然后这里就不用static对象
+	static ProcedureHelper pdcHelper;
+	if(pdcHelper.Prepare(pack->sentence) != 0)	//调用存储过程的准备工作，获取存储过程的参数列表
+		return false;
+
+	//准备调用参数
+	for(int param = 0; param < pack->paramNums; ++i)
+		pdcHelper.parameters[param].bindValue =  *pack->any_arr[param];
+
+	  if (helper.Execute() != 0)
+	  	return false; 
+
 
 	
 
@@ -430,6 +444,7 @@ void KKDD_SQL_MODULE::MyQuery::MySTMTBind::BindUTiny(unsigned char * data)
 	bind_param(MYSQL_TYPE_TINY, (void*)data, 0, 0);
 }
 
+
 void KKDD_SQL_MODULE::MyQuery::QueryResult::Release()	//释放 结果集资源
 {
 	if (res)
@@ -472,7 +487,6 @@ int KKDD_SQL_MODULE::MyQuery::QueryResult::FetchResult()
 	rows = mysql_fetch_row(res);
 	lens = mysql_fetch_lengths(res);
 
-	//根据 当前行 判断是否还有数据
 	return	(rows != NULL && lens != NULL) ? 0 : 1;
 }
 
@@ -497,29 +511,4 @@ KKDD_SQL_MODULE::MyQuery::QueryBind::~QueryBind()
 	LOG_INFO << "~QueryBind() 释放了:" << m_paramNumbers << "个参数......";
 }
 
-int ProcedureHelper::Prepare(const char *procName)
-{
-    return 0;
-}
 
-int ProcedureHelper::Execute()
-{
-    return 0;
-}
-
-void ProcedureHelper::Clear()
-{
-	strProc.clear();
-	strArgs.clear();
-	totalCount = inCount = outCount =inoutCount =0;
-	std::memset(parameters,0,sizeof(parameters));
-}
-
-ProcedureHelper::ProcedureHelper()
-{
-	Clear();
-}
-
-ProcedureHelper::~ProcedureHelper()
-{
-}

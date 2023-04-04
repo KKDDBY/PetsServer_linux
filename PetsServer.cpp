@@ -49,7 +49,6 @@ PetsServer::~PetsServer()
 
     if(codec)
         delete codec;
-
 }
 
 bool PetsServer::InitServer()
@@ -73,9 +72,6 @@ bool PetsServer::InitServer()
     if(!m_sqlIns->Init(DB_USERNAME,DB_PASSWORD,DB_IPADDRESS,DB_DBNAME,DB_IPPORT))
         return false;
 
-    //test
-    m_sqlIns->readMysqlStmt();
-    
     return true;
 }
 
@@ -114,6 +110,12 @@ bool PetsServer::start()
         LOG_INFO << "KKDD_TEST DEFINE OPEN";
     else
         LOG_INFO << "KKDD_TEST DEFINE CLOSE";
+
+    // MyQuery::QueryBind* bind = new MyQuery::QueryBind(2);
+    // (*bind)[0].BindString("TEST",strlen("TEST"));
+    // (*bind)[1].BindString("123456789",strlen("123456789"));
+    // Pet pet;
+    // pet.PrepareSQL(SQL_PACK_TYPE::SQL_STMT_TYPE,SELECT_PETSLOGIN_STMT,bind,std::bind(&Pet::OnMysqlLoginMsg,&pet,_1));
 
     return true;
 }

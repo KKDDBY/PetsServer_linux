@@ -14,12 +14,14 @@
 
 //#include "mysql.h"
 #include<iostream>
-#include<string.h> 
 #include<mysql/mysql.h>
 #include<mutex>
 #include<functional>
 #include<queue>
-#include <condition_variable>
+#include<condition_variable>
+#include<string>
+#include<string.h> 
+
 #include<boost/any.hpp>
 
 #include"Define.hpp"
@@ -135,7 +137,6 @@ namespace KKDD_SQL_MODULE		//自定义命名空间
 			DBInfo() { m_user = m_password = m_dbname = m_host = {}; m_port = 0; }
 			void SetInfo(char* UserName, char* PassWord, char* DBIP, char* DBName, unsigned int dwPort);
 
-		private:
 			std::string m_user;				//用户名
 			std::string m_password;			//密码
 			std::string m_dbname;			//db名称
@@ -173,6 +174,8 @@ namespace KKDD_SQL_MODULE		//自定义命名空间
 		//执行存储过程
 		bool ExecuteProcedure(SqlPack* pack);
 
+		const char* GetDBName() {return m_dbInfo.m_dbname.c_str();}	//获取db名称
+
 	//单例模式
 	private:
 		MyQuery();
@@ -180,17 +183,12 @@ namespace KKDD_SQL_MODULE		//自定义命名空间
 		MyQuery(const MyQuery&) = delete;
 		MyQuery(const MyQuery&&) = delete;
 		MyQuery& operator=(const MyQuery&) = delete;
-
-		//唯一句柄
-		static MyQuery* m_queryIns;
-		
-
+		static MyQuery* m_queryIns;		//唯一句柄
 	public:
 		MYSQL * m_pMysql;				//mysql 连接句柄
 		MYSQL_STMT *m_pMysqlStmt;		//mysql stmt连接句柄
 		ErrMsg m_errmsg;				//sql专用错误消息输出类
-		std::condition_variable m_cv;		 //条件变量
-
+		std::condition_variable m_cv;	//条件变量，后续开启多个sql线程，并发执行sql请求(注意临界区访问)
 	private:	
 		DBInfo m_dbInfo;				//DB连接信息
 		static GarbageCollection* m_gc;	//单例模式内置的垃圾回收器
@@ -198,52 +196,20 @@ namespace KKDD_SQL_MODULE		//自定义命名空间
 		std::queue<SqlPack*> m_sqlTaskQueue; //sql任务队列
 		std::mutex m_sqlQueueMtx;			 //mysql任务队列锁
 		bool m_exitFlag;					 //线程退出标志
-
+	
 	//测试函数 不重要
-	public:
+	public:	
 		void writeMysqlStmt();
 		void readMysqlStmt();		
 		void testProcedure();		
 	};
 };
 
-class ProcedureHelper:public KKDD_SQL_MODULE::MyQuery::QueryResult
-{
-	//参数定义
-	struct SqlParam
-	{
-		enum DIRECTION { V_IN, V_OUT, V_INOUT };
-		DIRECTION           direction;  // 参数传递方向
-		enum_field_types    type;	    // 参数类型
-		size_t              lens;	    // 有效的参数长度（针对于字符串或Blob类型）
-		boost::any       	bindValue;	// 参数值（包括传入传出） 根据 type进行转换
-	};
 
-	//现在定义的存储过程目前最多支持10个参数
-	enum { MAX_PARAM_COUNT = 10 };
 
-	std::string strProc;
-	std::string strArgs;
-	DWORD totalCount;
-	DWORD inCount;
-	DWORD outCount;
-	DWORD inoutCount;
-	SqlParam parameters[ MAX_PARAM_COUNT ];	//写死20个 感觉有点浪费空间哈,2023-3-28改小一点
-
-public:
-	int Prepare(const char* procName);		//存储过程准备工作
-	int Execute();							//执行存储过程
-	void Clear();							//清空
-	// int BindParam( int idx, lite::Variant &lvt );
-	// lite::Variant& GetParam( int idx );
-	// lite::Variant GetField( int idx );
-	ProcedureHelper();
-	~ProcedureHelper();
-};
-
-//sql任务定义
 typedef std::function<void(KKDD_SQL_MODULE::MyQuery::QueryResult&)> SqlCallBack;
-//typedef std::function<void (DNID,SMessage*,Pet*)> DispatcherCallBack;
+typedef std::function<void(KKDD_SQL_MODULE::MyQuery::QueryResult&,ProcedureOutParams*)> SqlCallBack_procedure;
+
 struct SqlPack						//mysql任务
 {
 	SQL_PACK_TYPE pack_type;		//操作类型
@@ -251,10 +217,11 @@ struct SqlPack						//mysql任务
 	union 
 	{
 		KKDD_SQL_MODULE::MyQuery::QueryBind* query_bind;	//注意释放资源
-		boost::any* any_arr;		//注意释放资源
+		boost::any* any_arr;						//注意释放资源
 	};
-	SqlCallBack sql_callback;		//本次sql执行完之后的回调函数
-	BYTE paramNums;		//联合体指针的数组成员个数	QueryBind不需要,内部内置了个数
+	SqlCallBack sql_callback;						//本次sql执行完之后的回调函数
+	SqlCallBack_procedure sql_callback_procedure;	//存储过程，回调(返回存储过程的out，inout值，以及存储过程本身select的返回结果)
+	BYTE paramNums;									//联合体指针的数组成员个数	QueryBind不需要,内部内置了个数
 };
 
 #endif
