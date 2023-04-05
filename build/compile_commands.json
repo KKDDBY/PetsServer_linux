@@ -1,0 +1,52 @@
+[
+{
+  "directory": "/home/KKDD/CODE/muduoNetServer/server/build",
+  "command": "/usr/bin/c++  -I/home/KKDD/CODE/muduoNetServer/server/muduo/include -I/home/KKDD/CODE/muduoNetServer/server -I/home/KKDD/CODE/muduoNetServer/server/NetMsg -I/home/KKDD/CODE/muduoNetServer/server/ObjectModule -I/home/KKDD/CODE/muduoNetServer/server/MySqlModule  -W -L/usr/lib64/mysql -DKKDD_TEST -g -std=gnu++11 -o CMakeFiles/server.dir/main.cpp.o -c /home/KKDD/CODE/muduoNetServer/server/main.cpp",
+  "file": "/home/KKDD/CODE/muduoNetServer/server/main.cpp"
+},
+{
+  "directory": "/home/KKDD/CODE/muduoNetServer/server/build",
+  "command": "/usr/bin/c++  -I/home/KKDD/CODE/muduoNetServer/server/muduo/include -I/home/KKDD/CODE/muduoNetServer/server -I/home/KKDD/CODE/muduoNetServer/server/NetMsg -I/home/KKDD/CODE/muduoNetServer/server/ObjectModule -I/home/KKDD/CODE/muduoNetServer/server/MySqlModule  -W -L/usr/lib64/mysql -DKKDD_TEST -g -std=gnu++11 -o CMakeFiles/server.dir/CELLTimestamp.cpp.o -c /home/KKDD/CODE/muduoNetServer/server/CELLTimestamp.cpp",
+  "file": "/home/KKDD/CODE/muduoNetServer/server/CELLTimestamp.cpp"
+},
+{
+  "directory": "/home/KKDD/CODE/muduoNetServer/server/build",
+  "command": "/usr/bin/c++  -I/home/KKDD/CODE/muduoNetServer/server/muduo/include -I/home/KKDD/CODE/muduoNetServer/server -I/home/KKDD/CODE/muduoNetServer/server/NetMsg -I/home/KKDD/CODE/muduoNetServer/server/ObjectModule -I/home/KKDD/CODE/muduoNetServer/server/MySqlModule  -W -L/usr/lib64/mysql -DKKDD_TEST -g -std=gnu++11 -o CMakeFiles/server.dir/Dispatcher.cpp.o -c /home/KKDD/CODE/muduoNetServer/server/Dispatcher.cpp",
+  "file": "/home/KKDD/CODE/muduoNetServer/server/Dispatcher.cpp"
+},
+{
+  "directory": "/home/KKDD/CODE/muduoNetServer/server/build",
+  "command": "/usr/bin/c++  -I/home/KKDD/CODE/muduoNetServer/server/muduo/include -I/home/KKDD/CODE/muduoNetServer/server -I/home/KKDD/CODE/muduoNetServer/server/NetMsg -I/home/KKDD/CODE/muduoNetServer/server/ObjectModule -I/home/KKDD/CODE/muduoNetServer/server/MySqlModule  -W -L/usr/lib64/mysql -DKKDD_TEST -g -std=gnu++11 -o CMakeFiles/server.dir/PetsServer.cpp.o -c /home/KKDD/CODE/muduoNetServer/server/PetsServer.cpp",
+  "file": "/home/KKDD/CODE/muduoNetServer/server/PetsServer.cpp"
+},
+{
+  "directory": "/home/KKDD/CODE/muduoNetServer/server/build",
+  "command": "/usr/bin/c++  -I/home/KKDD/CODE/muduoNetServer/server/muduo/include -I/home/KKDD/CODE/muduoNetServer/server -I/home/KKDD/CODE/muduoNetServer/server/NetMsg -I/home/KKDD/CODE/muduoNetServer/server/ObjectModule -I/home/KKDD/CODE/muduoNetServer/server/MySqlModule  -W -L/usr/lib64/mysql -DKKDD_TEST -g -std=gnu++11 -o CMakeFiles/server.dir/codec.cpp.o -c /home/KKDD/CODE/muduoNetServer/server/codec.cpp",
+  "file": "/home/KKDD/CODE/muduoNetServer/server/codec.cpp"
+},
+{
+  "directory": "/home/KKDD/CODE/muduoNetServer/server/build",
+  "command": "/usr/bin/c++  -I/home/KKDD/CODE/muduoNetServer/server/muduo/include -I/home/KKDD/CODE/muduoNetServer/server -I/home/KKDD/CODE/muduoNetServer/server/NetMsg -I/home/KKDD/CODE/muduoNetServer/server/ObjectModule -I/home/KKDD/CODE/muduoNetServer/server/MySqlModule  -W -L/usr/lib64/mysql -DKKDD_TEST -g -std=gnu++11 -o CMakeFiles/server.dir/ObjectModule/ObjectManager.cpp.o -c /home/KKDD/CODE/muduoNetServer/server/ObjectModule/ObjectManager.cpp",
+  "file": "/home/KKDD/CODE/muduoNetServer/server/ObjectModule/ObjectManager.cpp"
+},
+{
+  "directory": "/home/KKDD/CODE/muduoNetServer/server/build",
+  "command": "/usr/bin/c++  -I/home/KKDD/CODE/muduoNetServer/server/muduo/include -I/home/KKDD/CODE/muduoNetServer/server -I/home/KKDD/CODE/muduoNetServer/server/NetMsg -I/home/KKDD/CODE/muduoNetServer/server/ObjectModule -I/home/KKDD/CODE/muduoNetServer/server/MySqlModule  -W -L/usr/lib64/mysql -DKKDD_TEST -g -std=gnu++11 -o CMakeFiles/server.dir/ObjectModule/Pet.cpp.o -c /home/KKDD/CODE/muduoNetServer/server/ObjectModule/Pet.cpp",
+  "file": "/home/KKDD/CODE/muduoNetServer/server/ObjectModule/Pet.cpp"
+},
+{
+  "directory": "/home/KKDD/CODE/muduoNetServer/server/build",
+  "command": "/usr/bin/c++  -I/home/KKDD/CODE/muduoNetServer/server/muduo/include -I/home/KKDD/CODE/muduoNetServer/server -I/home/KKDD/CODE/muduoNetServer/server/NetMsg -I/home/KKDD/CODE/muduoNetServer/server/ObjectModule -I/home/KKDD/CODE/muduoNetServer/server/MySqlModule  -W -L/usr/lib64/mysql -DKKDD_TEST -g -std=gnu++11 -o CMakeFiles/server.dir/ObjectModule/PetsManager.cpp.o -c /home/KKDD/CODE/muduoNetServer/server/ObjectModule/PetsManager.cpp",
+  "file": "/home/KKDD/CODE/muduoNetServer/server/ObjectModule/PetsManager.cpp"
+},
+{
+  "directory": "/home/KKDD/CODE/muduoNetServer/server/build",
+  "command": "/usr/bin/c++  -I/home/KKDD/CODE/muduoNetServer/server/muduo/include -I/home/KKDD/CODE/muduoNetServer/server -I/home/KKDD/CODE/muduoNetServer/server/NetMsg -I/home/KKDD/CODE/muduoNetServer/server/ObjectModule -I/home/KKDD/CODE/muduoNetServer/server/MySqlModule  -W -L/usr/lib64/mysql -DKKDD_TEST -g -std=gnu++11 -o CMakeFiles/server.dir/MySqlModule/MysqlQuery.cpp.o -c /home/KKDD/CODE/muduoNetServer/server/MySqlModule/MysqlQuery.cpp",
+  "file": "/home/KKDD/CODE/muduoNetServer/server/MySqlModule/MysqlQuery.cpp"
+},
+{
+  "directory": "/home/KKDD/CODE/muduoNetServer/server/build",
+  "command": "/usr/bin/c++  -I/home/KKDD/CODE/muduoNetServer/server/muduo/include -I/home/KKDD/CODE/muduoNetServer/server -I/home/KKDD/CODE/muduoNetServer/server/NetMsg -I/home/KKDD/CODE/muduoNetServer/server/ObjectModule -I/home/KKDD/CODE/muduoNetServer/server/MySqlModule  -W -L/usr/lib64/mysql -DKKDD_TEST -g -std=gnu++11 -o CMakeFiles/server.dir/MySqlModule/ProcedureHelper.cpp.o -c /home/KKDD/CODE/muduoNetServer/server/MySqlModule/ProcedureHelper.cpp",
+  "file": "/home/KKDD/CODE/muduoNetServer/server/MySqlModule/ProcedureHelper.cpp"
+}
+]

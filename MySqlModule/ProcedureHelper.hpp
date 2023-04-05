@@ -36,9 +36,9 @@ public:
 	int Prepare(const char* procName);		//存储过程准备工作
 	int Execute();							//执行存储过程
 	void Clear();							//清空
-	std::string GetAnyValue(SqlParam& param);				//将boost::any类型 转换成MySQL基本数据类型，最后转换成字符串 返回.
-	enum_field_types GetMySqlType(std::string& typestr);	//根据字符串判断，返回MySQL类型
-	void SqlResultToAny(SqlParam& param,char* value,sie_t size);	//将MySQL查询字段字符串，按照原来类型转换成boost::any类型
+	std::string AnyValueToString(SqlParam& param);				//将boost::any类型 转换成MySQL基本数据类型，最后转换成字符串 返回.
+	void SqlValueToAny(SqlParam& param,char* value,size_t size);	//将MySQL查询字段字符串，按照原来类型转换成boost::any类型
+	enum_field_types GetMySqlType(const std::string& typestr);	//根据字符串判断，返回MySQL类型
 
 	enum { MAX_PARAM_COUNT = 10 };		//现在定义的存储过程目前最多支持10个参数
 public:
@@ -49,15 +49,6 @@ public:
 	DWORD outCount;
 	DWORD inoutCount;
 	SqlParam parameters[ MAX_PARAM_COUNT ];	//写死20个 感觉有点浪费空间哈,2023-3-28改小一点
-};
-
-//sql任务定义
-struct ProcedureOutParams
-{	
-	ProcedureOutParams(BYTE count) {paramscount = count; type = nullptr; outValues = nullptr;}
-	enum_field_types*    type;	    // 参数类型
-	boost::any*       	outValues;	// 参数值（包括传入传出） 根据 type进行转换
-	BYTE paramscount;
 };
 
 

@@ -96,7 +96,7 @@ bool PetsServer::start()
         LOG_ERROR << "m_mysqlThread start failed...";
         return false;
     }   
-    LOG_ERROR << "m_mysqlThread start successfully...";
+    LOG_INFO << "m_mysqlThread start successfully...";
     
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -111,11 +111,22 @@ bool PetsServer::start()
     else
         LOG_INFO << "KKDD_TEST DEFINE CLOSE";
 
-    // MyQuery::QueryBind* bind = new MyQuery::QueryBind(2);
-    // (*bind)[0].BindString("TEST",strlen("TEST"));
-    // (*bind)[1].BindString("123456789",strlen("123456789"));
-    // Pet pet;
-    // pet.PrepareSQL(SQL_PACK_TYPE::SQL_STMT_TYPE,SELECT_PETSLOGIN_STMT,bind,std::bind(&Pet::OnMysqlLoginMsg,&pet,_1));
+
+    //MyQuery::QueryResult qr;
+    //m_sqlIns->ExecuteSQL("select @_1",&qr);
+    //m_sqlIns->ExecuteSQL("set @_1 = null",&qr);
+
+    MyQuery::QueryBind* bind = new MyQuery::QueryBind(2);
+    (*bind)[0].BindString("TEST",strlen("TEST"));
+    (*bind)[1].BindString("123456789",strlen("123456789"));
+    Pet pet;
+    pet.PrepareSQL(SQL_PACK_TYPE::SQL_STMT_TYPE,SELECT_PETSLOGIN_STMT,bind,2,std::bind(&Pet::OnMysqlLoginMsg,&pet,_1));
+
+    boost::any* bind1 = new  boost::any[2];
+    bind1[0] = (char*)"TEST";   //只需要准备in inout数据
+    char* s = boost::any_cast<char*>(bind1[0]);
+    LOG_INFO << s ;
+    pet.PrepareSQL(SQL_PACK_TYPE::SQL_PROCEDURE_TYPE,"p_test",bind1,2,std::bind(&Pet::TESTFUNC,&pet,_1));
 
     return true;
 }

@@ -157,7 +157,8 @@ namespace KKDD_SQL_MODULE		//自定义命名空间
 		int ExecuteStmt(const char* sql,QueryResult& qr, Arguments args = Arguments(0, 0));	
 
 		//执行 mysql普通查询过程
-		int ExecuteSQL(const char* sql, QueryResult& qr);
+		int ExecuteSQL(const char* sql, QueryResult* qr);
+		int ExecuteSQLEx(const char* sql, QueryResult& qr);
 
 		//获取单例
 		static MyQuery* GetQueryInstance();
@@ -207,8 +208,8 @@ namespace KKDD_SQL_MODULE		//自定义命名空间
 
 
 
-typedef std::function<void(KKDD_SQL_MODULE::MyQuery::QueryResult&)> SqlCallBack;
-typedef std::function<void(KKDD_SQL_MODULE::MyQuery::QueryResult&,ProcedureOutParams*)> SqlCallBack_procedure;
+typedef std::function<void(KKDD_SQL_MODULE::MyQuery::QueryResult*)> SqlCallBack;
+//typedef std::function<void(KKDD_SQL_MODULE::MyQuery::QueryResult*,ProcedureOutParams*)> SqlCallBack_procedure;
 
 struct SqlPack						//mysql任务
 {
@@ -220,7 +221,6 @@ struct SqlPack						//mysql任务
 		boost::any* any_arr;						//注意释放资源
 	};
 	SqlCallBack sql_callback;						//本次sql执行完之后的回调函数
-	SqlCallBack_procedure sql_callback_procedure;	//存储过程，回调(返回存储过程的out，inout值，以及存储过程本身select的返回结果)
 	BYTE paramNums;									//联合体指针的数组成员个数	QueryBind不需要,内部内置了个数
 };
 

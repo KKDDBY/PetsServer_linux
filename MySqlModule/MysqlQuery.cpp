@@ -93,7 +93,7 @@ void KKDD_SQL_MODULE::MyQuery::Realse()
 
 bool KKDD_SQL_MODULE::MyQuery::Connect(char* UserName, char* PassWord, char* DBIP, char* DBName, unsigned int dwPort, unsigned int client_flag)
 {
-	if (nullptr == mysql_real_connect(m_pMysql, DBIP, UserName, PassWord, DBName, dwPort,NULL,0))
+	if (nullptr == mysql_real_connect(m_pMysql, DBIP, UserName, PassWord, DBName, dwPort,NULL,CLIENT_MULTI_RESULTS))
 	{
 		m_errmsg.LogMsg("mysql_real_connect Error [%s]",mysql_error(m_pMysql)); 
 		return false;
@@ -153,7 +153,7 @@ int KKDD_SQL_MODULE::MyQuery::ExecuteStmt(const char * sql,QueryResult & qr, Arg
 	return 0;
 }
 
-int KKDD_SQL_MODULE::MyQuery::ExecuteSQL(const char * sql, QueryResult & qr)
+int KKDD_SQL_MODULE::MyQuery::ExecuteSQL(const char * sql, QueryResult* qr)
 {
 	if (sql == NULL || m_pMysql == NULL)
 		return m_errmsg.LogMsg("sql or MySQL is NULL!!!"),-1;
@@ -161,25 +161,38 @@ int KKDD_SQL_MODULE::MyQuery::ExecuteSQL(const char * sql, QueryResult & qr)
 	//执行查询语句
 	int result = mysql_real_query(m_pMysql, sql, strlen(sql));
 	if (result != 0)
-		return m_errmsg.LogMsg("Execute mysql_real_query is Error [reason:%S --- sql:%s]",mysql_error(m_pMysql),sql),result;
+		return m_errmsg.LogMsg("Execute mysql_real_query is Error [reason:%s --- sql:%s]",mysql_error(m_pMysql),sql),result;
 
 	//将查询内容缓冲到本地
 	MYSQL_RES* tempSQL_RES = mysql_store_result(m_pMysql);
-	if(!tempSQL_RES)
-		return m_errmsg.LogMsg("Execute mysql_store_result is Error [reason:%S --- sql:%s]", mysql_error(m_pMysql), sql), -1;
-
-	qr.sql = sql;
-	qr.res = tempSQL_RES;
-	qr.nrow = mysql_affected_rows(m_pMysql);
-
-	if (qr.res)
-	{
-		qr.num_rows = mysql_num_rows(qr.res);		//结果集中的行数
-		qr.num_fields = mysql_num_fields(qr.res);		//结果集中的字段数
-	}
 	
+	if(qr != NULL)
+	{
+		qr->sql = sql;
+		qr->res = tempSQL_RES;
+        qr->nrow = mysql_affected_rows(m_pMysql);
 
+		if(qr->res)
+        {
+            qr->num_rows = mysql_num_rows( qr->res );
+            qr->num_fields = mysql_num_fields( qr->res );
+        }
+        tempSQL_RES = NULL;
+	}
+	if(tempSQL_RES != NULL)
+		mysql_free_result(tempSQL_RES)/*, OutputDebugString( "release\r\n" )*/;
+	return 0;
+}
 
+int KKDD_SQL_MODULE::MyQuery::ExecuteSQLEx(const char *sql, QueryResult &qr)
+{
+    if (sql == NULL || m_pMysql == NULL)
+		return m_errmsg.LogMsg("sql or MySQL is NULL!!!"),-1;
+
+	//执行查询语句
+	int result = mysql_real_query(m_pMysql, sql, strlen(sql));
+	if (result != 0)
+		return m_errmsg.LogMsg("Execute mysql_real_query is Error [reason:%s --- sql:%s]",mysql_error(m_pMysql),sql),result;
 	return 0;
 }
 
@@ -213,13 +226,15 @@ void KKDD_SQL_MODULE::MyQuery::MysqlLoop()
 			ExecuteSentence(pack);
 
 			//pack资源释放
-			if(pack->query_bind)
-				delete pack->query_bind;
+			if(pack->pack_type == SQL_PROCEDURE_TYPE)
+				if(pack->any_arr)
+					delete[] pack->any_arr;
+			else
+				if(pack->query_bind)
+					delete pack->query_bind;
 			delete pack;
 		}
-
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));	//执行完后继续休眠
-
 	}
 	
 
@@ -265,9 +280,9 @@ void KKDD_SQL_MODULE::MyQuery::ExecuteSentence(SqlPack *pack)
 			if(__UNUSEFUL__)
 				LOG_INFO << "SQL_COMMON_TYPE";
 			QueryResult qr;
-			if(ExecuteSQL(pack->sentence,qr) != 0)
+			if(ExecuteSQL(pack->sentence,&qr) != 0)
 				return;
-			pack->sql_callback(qr);
+			pack->sql_callback(&qr);
 		}
 	break;
 	case SQL_PACK_TYPE::SQL_STMT_TYPE:
@@ -277,7 +292,7 @@ void KKDD_SQL_MODULE::MyQuery::ExecuteSentence(SqlPack *pack)
 			QueryResult qr;
 			if(ExecuteStmt(pack->sentence,qr,*pack->query_bind) != 0)
 				return;
-			pack->sql_callback(qr);	
+			pack->sql_callback(&qr);	
 		}
 	break;
 	case SQL_PACK_TYPE::SQL_PROCEDURE_TYPE:
@@ -298,19 +313,17 @@ bool KKDD_SQL_MODULE::MyQuery::ExecuteProcedure(SqlPack *pack)
 {
 	static ProcedureHelper pdcHelper;
 	if(pdcHelper.Prepare(pack->sentence) != 0)	//调用存储过程的准备工作，获取存储过程的参数列表
-		return false;
+		return pdcHelper.Clear(),false;
 
 	//准备调用参数
-	for(int param = 0; param < pack->paramNums; ++i)
-		pdcHelper.parameters[param].bindValue =  *pack->any_arr[param];
+	for(int param = 0; param < pack->paramNums; ++param)
+		pdcHelper.parameters[param].bindValue =  pack->any_arr[param];
 
-	  if (helper.Execute() != 0)
-	  	return false; 
+	if (pdcHelper.Execute() != 0)
+		return pdcHelper.Clear(),false; 
 
-
+	pack->sql_callback(&pdcHelper);
 	
-
-
 	pdcHelper.Clear();	//每次执行完一次
     return true;
 }
@@ -451,9 +464,7 @@ void KKDD_SQL_MODULE::MyQuery::QueryResult::Release()	//释放 结果集资源
 		mysql_free_result(res);
 
 	if (stmt != NULL)
-	{
 		mysql_stmt_free_result(stmt);
-	}
 }
 
 int KKDD_SQL_MODULE::MyQuery::QueryResult::AffectedRows()

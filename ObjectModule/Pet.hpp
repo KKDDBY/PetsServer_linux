@@ -41,14 +41,16 @@ public:
     DNID GetDnid();
     std::vector<std::string> Parse(std::string str ,std::string delimiter);
 
-    void PrepareSQL(SQL_PACK_TYPE type,const char* sentence,MyQuery::QueryBind* bind,SqlCallBack cb);
+    void PrepareSQL(SQL_PACK_TYPE type,const char* sentence,/*MyQuery::QueryBind**/void* bind,size_t bindNums,SqlCallBack cb);
 //Net消息处理模块
 public:
     void OnNetLoginMsg(SQLoginMsg* pMsg);
 
 //MySQL回调模块函数，参数统一为sql的返回值，这样就跟sql模块解耦了
 public:
-    void OnMysqlLoginMsg(MyQuery::QueryResult& qr);
+    void OnMysqlLoginMsg(MyQuery::QueryResult* qr);
+
+    void TESTFUNC(MyQuery::QueryResult* qr);
 
 
 public:

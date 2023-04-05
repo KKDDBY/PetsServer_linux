@@ -42,13 +42,17 @@ std::vector<std::string> Pet::Parse(std::string str,std::string delimiter)
     
 }
 
-void Pet::PrepareSQL(SQL_PACK_TYPE type, const char *sentence, MyQuery::QueryBind *bind, SqlCallBack cb) //解耦
+void Pet::PrepareSQL(SQL_PACK_TYPE type, const char *sentence, /*MyQuery::QueryBind **/ void* bind,size_t bindNums ,SqlCallBack cb) //解耦
 {
     SqlPack* sqlpack = new SqlPack;
-    sqlpack->pack_type = SQL_PACK_TYPE::SQL_STMT_TYPE;
-    sqlpack->sentence = SELECT_PETSLOGIN_STMT;
-    sqlpack->query_bind = bind;
+    sqlpack->pack_type = type;
+    sqlpack->sentence = sentence;
+    if(type == SQL_PACK_TYPE::SQL_PROCEDURE_TYPE)
+        sqlpack->any_arr = (boost::any*)bind;
+    else
+        sqlpack->query_bind = (KKDD_SQL_MODULE::MyQuery::QueryBind*)bind;
     sqlpack->sql_callback = cb;
+    sqlpack->paramNums = bindNums;
     MyQuery::GetQueryInstance()->PushSqlPack(sqlpack);
     MyQuery::GetQueryInstance()->m_cv.notify_one(); //唤醒sql线程，开始工作辣
 }
@@ -64,21 +68,25 @@ void Pet::OnNetLoginMsg(SQLoginMsg *pMsg)
         LOG_INFO << "void Pet::OnNetLoginMsg(SQLoginMsg *pMsg)";
 
     //准备sql包 
-    MyQuery::QueryBind* bind = new MyQuery::QueryBind(2);
-    (*bind)[0].BindString(vecParam[0].c_str(),vecParam[0].size());
-    (*bind)[1].BindString(vecParam[1].c_str(),vecParam[1].size());
-    PrepareSQL(SQL_PACK_TYPE::SQL_STMT_TYPE,SELECT_PETSLOGIN_STMT,bind,std::bind(&Pet::OnMysqlLoginMsg,this,_1));
+    // MyQuery::QueryBind* bind = new MyQuery::QueryBind(2);
+    // (*bind)[0].BindString(vecParam[0].c_str(),vecParam[0].size());
+    // (*bind)[1].BindString(vecParam[1].c_str(),vecParam[1].size());
+    // PrepareSQL(SQL_PACK_TYPE::SQL_STMT_TYPE,SELECT_PETSLOGIN_STMT,bind,std::bind(&Pet::OnMysqlLoginMsg,this,_1));
+
+    //存储过程测试
+
+
 }
 
-void Pet::OnMysqlLoginMsg(MyQuery::QueryResult &qr)
+void Pet::OnMysqlLoginMsg(MyQuery::QueryResult* qr)
 {
-    if ( qr.AffectedRows() != 0 )
+    if ( qr->AffectedRows() != 0 )
 	{
         long int roleID = 0;
     	MyQuery::QueryBind bind(1);
 		bind[0].BindLong( &roleID );
 
-		while ( qr.FetchResult( bind ) == 0 )
+		while ( qr->FetchResult( bind ) == 0 )
 		{
 			if ( bind[0].IsNull() || roleID == 0)
 				continue;
@@ -99,4 +107,9 @@ void Pet::OnMysqlLoginMsg(MyQuery::QueryResult &qr)
         }
     
 	}
+}
+
+void Pet::TESTFUNC(MyQuery::QueryResult *qr)
+{
+    LOG_INFO << "TESTFUNC CALL";
 }
